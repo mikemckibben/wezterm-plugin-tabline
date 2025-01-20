@@ -5,12 +5,12 @@ return {
   update = function(tab, opts)
     local cwd_uri = tab.active_pane.current_working_dir
     if cwd_uri then
-      local file_path = cwd_uri.file_path
-      cwd = file_path:match('([^/]+)/?$')
+      local cwd = cwd_uri.file_path
       if cwd and #cwd > opts.max_length then
-        cwd = cwd:sub(1, opts.max_length - 1) .. '…'
+        cwd = '…' .. cwd:sub(-1*opts.max_length)
       end
+      return cwd
     end
-    return cwd or ''
+    return ''
   end,
 }

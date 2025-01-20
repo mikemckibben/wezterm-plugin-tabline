@@ -2,33 +2,52 @@ local wezterm = require('wezterm')
 
 local M = {}
 
+
+function M.is_array(a)
+  -- rely on #a == 0  and next returning non-nil for table objects
+  -- assume {} is an array
+  return type(a) == 'table' and (#a > 0 or next(a) == nil)
+end
+
+function M.mk_transparent(c)
+  if c ~= nil then
+    if type(c) == 'string' then
+      c = wezterm.color.parse(c)
+    end
+    local h, s, l, a = c:hsla()
+    return wezterm.color.from_hsla(h, s, l, 0.0)
+  end
+end
+
 function M.deep_extend(t1, t2)
   local overwrite = {
-    tabline_a = true,
-    tabline_b = true,
-    tabline_c = true,
+    status_left = true,
+    status_right = true,
     tab_active = true,
     tab_inactive = true,
-    tabline_x = true,
-    tabline_y = true,
-    tabline_z = true,
-    extensions = true,
   }
 
-  for k, v in pairs(t2) do
-    if overwrite[k] then
-      t1[k] = v
-    elseif type(v) == 'table' then
-      if type(t1[k] or false) == 'table' then
-        M.deep_extend(t1[k], t2[k])
-      else
-        t1[k] = v
-      end
-    else
-      t1[k] = v
+  local function merge(a, b)
+    if type(a) ~= 'table' or type(b) ~= 'table' then
+      return b
     end
+    for k, v in pairs(b) do
+      if overwrite[k] then
+        a[k] = M.deep_copy(v)
+      elseif type(v) == 'table' then
+        local va = a[k]
+        if va == nil or type(va) ~= 'table' then
+          va = {}
+        end
+        a[k] = merge(va, M.deep_copy(v))
+      else
+        a[k] = v
+      end
+    end
+    return a
   end
-  return t1
+
+  return merge(t1, t2)
 end
 
 function M.deep_copy(orig)
@@ -81,7 +100,7 @@ function M.extract_components(components_opts, attributes, object, format)
         if ok then
           local opts = M.deep_copy(component_opts)
           if result.default_opts then
-            opts = M.deep_extend(opts, result.default_opts)
+            opts = M.deep_extend(result.default_opts, opts)
           end
           local component = M.create_component(result.update(object, opts), opts, object, attributes, format)
           if component then
@@ -96,7 +115,7 @@ function M.extract_components(components_opts, attributes, object, format)
       if ok then
         local opts = M.deep_copy(component_opts)
         if result.default_opts then
-          opts = M.deep_extend(opts, result.default_opts)
+          opts = M.deep_extend(result.default_opts, opts)
         end
         opts = M.deep_extend(opts, v)
         table.remove(opts, 1)

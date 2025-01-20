@@ -1,44 +1,28 @@
-# tabline.wez
+# wezterm-plugin-tabline
+
+This is a fork of [tabline.wez](https://github.com/michaelbrusegard/tabline.wez).
 
 A versatile and easy to use tab-bar written in Lua.
 
-`tabline.wez` requires the [WezTerm](https://wezfurlong.org/wezterm/index.html) terminal emulator.
+`wezterm-plugin-tabline` requires the [WezTerm](https://wezfurlong.org/wezterm/index.html) terminal emulator.
 
 Tabline was greatly inspired by [lualine.nvim](https://github.com/nvim-lualine/lualine.nvim/tree/master), a statusline plugin for [Neovim](https://neovim.io), and tries to use the same configuration format.
-
-## Contributing
-
-Feel free to create an issue/PR if you want to see anything else implemented, or if you have some question or need help with configuration.
 
 ## Screenshots
 
 Here is a preview of what the tab-bar can look like.
 
 <p>
-  <img width="1656" alt="tabline 1" src="https://github.com/user-attachments/assets/bc3a2dc3-fa95-4386-a2b2-6b593dc4cef8">
-  <img width="1656" alt="tabline 2" src="https://github.com/user-attachments/assets/6c72b8b0-7751-4972-950e-ee1e3de1a39b">
-  <img width="1656" alt="tabline 3" src="https://github.com/user-attachments/assets/cd61edca-8c50-477b-a14a-84a89d369600">
-  <img width="1656" alt="tabline 4" src="https://github.com/user-attachments/assets/38b194ec-33d9-4955-af08-c70c25b3bcf0">
-  <img width="1656" alt="tabline 5" src="https://github.com/user-attachments/assets/ff216ab2-8a60-494d-9b11-9295212143df">
 </p>
 
-Some more examples, but very zoomed in.
-
-<p>
-  <img width="1680" alt="tabline 1 big" src="https://github.com/user-attachments/assets/2b48be12-7875-4282-aeb4-c24b0ed2fc1c">
-  <img width="1680" alt="tabline 2 big" src="https://github.com/user-attachments/assets/b3ec5b88-d940-4ff0-9612-0f74d8b003a3">
-  <img width="1680" alt="tabline 3 big" src="https://github.com/user-attachments/assets/00e39a55-5628-4926-9d42-9eff1e00e75c">
-  <img width="1680" alt="tabline 4 big" src="https://github.com/user-attachments/assets/a2d84536-345c-4fce-9b50-d55b2768ae90">
-</p>
-
-`tabline.wez` supports all the same themes as WezTerm. You can find the list of themes [here](https://wezfurlong.org/wezterm/colorschemes/index.html).
+`wezterm-plugin-tabline` supports all the same themes as WezTerm. You can find the list of themes [here](https://wezfurlong.org/wezterm/colorschemes/index.html).
 
 ## Installation
 
 ### WezTerm Plugin API
 
 ```lua
-local tabline = wezterm.plugin.require("https://github.com/michaelbrusegard/tabline.wez")
+local tabline = wezterm.plugin.require("https://github.com/mikemckibben/wezterm-plugin-tabline")
 ```
 
 You'll also need to have a patched font if you want icons.
@@ -49,11 +33,11 @@ Tabline has sections as shown below just like lualine with the addition of `tabs
 
 ```text
 +-------------------------------------------------+
-| A | B | C |  TABS                   | X | Y | Z |
+| LEFT |  TABS                            | RIGHT |
 +-------------------------------------------------+
 ```
 
-Each sections holds its components e.g. Current active keytable (mode).
+Each sections holds its components.
 
 ### Configuring tabline in wezterm.lua
 
@@ -66,10 +50,6 @@ tabline.setup({
     theme = 'Catppuccin Mocha',
     tabs_enabled = true,
     theme_overrides = {},
-    section_separators = {
-      left = wezterm.nerdfonts.pl_left_hard_divider,
-      right = wezterm.nerdfonts.pl_right_hard_divider,
-    },
     component_separators = {
       left = wezterm.nerdfonts.pl_left_soft_divider,
       right = wezterm.nerdfonts.pl_right_soft_divider,
@@ -80,22 +60,15 @@ tabline.setup({
     },
   },
   sections = {
-    tabline_a = { 'mode' },
-    tabline_b = { 'workspace' },
-    tabline_c = { ' ' },
+    status_left = { 'workspace',  },
     tab_active = {
       'index',
-      { 'parent', padding = 0 },
-      '/',
       { 'cwd', padding = { left = 0, right = 1 } },
       { 'zoomed', padding = 0 },
     },
     tab_inactive = { 'index', { 'process', padding = { left = 0, right = 1 } } },
-    tabline_x = { 'ram', 'cpu' },
-    tabline_y = { 'datetime', 'battery' },
-    tabline_z = { 'domain' },
+    status_right = { 'ram', 'cpu', 'datetime', 'battery', 'domain' },
   },
-  extensions = {},
 })
 ```
 
@@ -109,14 +82,22 @@ tabline.get_config()
 
 #### WezTerm configuration
 
-Tabline requires that some options are applied to the WezTerm [Config](https://wezfurlong.org/wezterm/config/lua/config/index.html) struct. For example the retro tab-bar must be enabled. Tabline provides a function to apply some recommended options to the config. If you already set these options in your `wezterm.lua` you do not need this function. This needs to be called after `wezterm.setup()`.
+Tabline requires that some options are applied to the WezTerm
+[Config](https://wezfurlong.org/wezterm/config/lua/config/index.html) struct.
+For example the retro tab-bar must be enabled. Tabline provides a function to
+apply some recommended options to the config. If you already set these options
+in your `wezterm.lua` you do not need this function. This needs to be called
+after `wezterm.setup()`.
 
 ```lua
 tabline.apply_to_config(config)
 ```
 
 > [!CAUTION]
-> This function has nothing to do with the tabline config passed into setup and retrieved with `tabline.get_config()`. It only applies some recommended options to the WezTerm config. More info [here](https://github.com/michaelbrusegard/tabline.wez/discussions/3)
+> This function has nothing to do with the tabline config passed into setup and
+> retrieved with `tabline.get_config()`. It only applies some recommended
+> options to the WezTerm config. More info
+> [here](https://github.com/michaelbrusegard/tabline.wez/discussions/3)
 
 ---
 
@@ -134,7 +115,11 @@ tabline.setup()
 options = { theme = 'GruvboxDark' }
 ```
 
-All available themes are found [here](https://wezfurlong.org/wezterm/colorschemes/index.html). Tabline uses [get_builtin_schemes()](https://wezfurlong.org/wezterm/config/lua/wezterm.color/get_builtin_schemes.html) under the hood, and not all the color schemes in WezTerm supplies the colors that some of the [extensions](#extensions) for Tabline require. To get around this it is also possible to input your own colors from the WezTerm config or a completely custom colors scheme object.
+All available themes are found
+[here](https://wezfurlong.org/wezterm/colorschemes/index.html). Tabline uses
+[get_builtin_schemes()](https://wezfurlong.org/wezterm/config/lua/wezterm.color/get_builtin_schemes.html)
+under the hood. To get around this it is also possible to input your own colors
+from the WezTerm config or a completely custom colors scheme object.
 
 ```lua
 options = { theme = config.colors } -- This is the WezTerm config colors object
@@ -145,46 +130,29 @@ options = { theme = config.colors } -- This is the WezTerm config colors object
 To modify a theme, you can use the `theme_overrides` option.
 
 ```lua
--- Change the background of tabline_c section for normal mode
+-- Change the background of status_left section
 tabline.setup({
   options = {
     theme_overrides = {
-      normal_mode = {
-        c = { bg = '#112233' },
+      status_left = {
+        bg = '#112233',
       },
     }
   }
 })
 ```
 
-This is also where you would specify the colors for a new [Key Table](https://wezfurlong.org/wezterm/config/key-tables.html) (mode). Tabline expects each key table to end with `_mode`.
-
+This is also where you would specify the colors for a new [Key
+Table](https://wezfurlong.org/wezterm/config/key-tables.html). 
 ```lua
 tabline.setup({
   options = {
     theme_overrides = {
-    -- Default colors from Catppuccin Mocha
-      normal_mode = {
-        a = { fg = '#181825', bg = '#89b4fa' },
-        b = { fg = '#89b4fa', bg = '#313244' },
-        c = { fg = '#cdd6f4', bg = '#181825' },
-      },
-      copy_mode = {
-        a = { fg = '#181825', bg = '#f9e2af' },
-        b = { fg = '#f9e2af', bg = '#313244' },
-        c = { fg = '#cdd6f4', bg = '#181825' },
-      },
-      search_mode = {
-        a = { fg = '#181825', bg = '#a6e3a1' },
-        b = { fg = '#a6e3a1', bg = '#313244' },
-        c = { fg = '#cdd6f4', bg = '#181825' },
-      },
-      -- Defining colors for a new key table
-      window_mode = {
-        a = { fg = '#181825', bg = '#cba6f7' },
-        b = { fg = '#cba6f7', bg = '#313244' },
-        c = { fg = '#cdd6f4', bg = '#181825' },
-      },
+      key_tables = {
+        -- key corresponds to key under wezterm config.key_tables
+        my_key_table = { bg = '#313244' },
+        -- ...
+      }
       -- Default tab colors
       tab = {
         active = { fg = '#89b4fa', bg = '#313244' },
@@ -204,16 +172,16 @@ If you want to get the current theme and its colors, you can do so with:
 tabline.get_theme()
 ```
 
-You will get an object like the `theme_overrides` object above, but with the addition of a colors property (the colors property is the colors object from the WezTerm config with every color found there).
-
-> [!TIP]
-> This can be useful when creating your own components or extensions and you want to use the same colors as the current theme
+You will get an object like the `theme_overrides` object above, but with the
+addition of a colors property (the colors property is the colors object from the
+WezTerm config with every color found there).
 
 ---
 
 ### Tabs
 
-You can disable overwriting tabs by setting `tabs_enabled` to `false` in the options table.
+You can disable overwriting tabs by setting `tabs_enabled` to `false` in the
+options table.
 
 ---
 
@@ -242,8 +210,8 @@ options = {
 }
 ```
 
-Here, left refers to the left-most sections (a, b, c), and right refers
-to the right-most sections (x, y, z). For the tabs it refers to each side of the tab.
+Here, left refers to the left-most sections (a, b, c), and right refers to the
+right-most sections (x, y, z). For the tabs it refers to each side of the tab.
 
 #### Disabling separators
 
@@ -260,14 +228,19 @@ options = {
 ### Changing components in tabline sections
 
 ```lua
-sections = { tabline_a = { 'mode' } }
+sections = { status_left = { 'mode' } }
 ```
 
 #### Available components
 
-Tabline separates components into ones available for the tabline components (`tabline_a`, `tabline_b`, etc...), which are grouped under Window since they have access to the [Window](https://wezfurlong.org/wezterm/config/lua/window/index.html) object.
+Tabline separates components into ones available for the tabline components
+(`status_left`, `status_right`, etc...), which are grouped under Window since they
+have access to the
+[Window](https://wezfurlong.org/wezterm/config/lua/window/index.html) object.
 
-And the `tab_active` and `tab_inactive` components which are grouped under Tab and have access to [TabInformation](https://wezfurlong.org/wezterm/config/lua/TabInformation.html).
+And the `tab_active` and `tab_inactive` components which are grouped under Tab
+and have access to
+[TabInformation](https://wezfurlong.org/wezterm/config/lua/TabInformation.html).
 
 - Window
   - `mode` (current keytable)
@@ -296,25 +269,29 @@ And the `tab_active` and `tab_inactive` components which are grouped under Tab a
 local function hello()
   return 'Hello World'
 end
-sections = { tabline_a = { hello } }
+sections = { status_left = { hello } }
 ```
 
 > [!NOTE]
-> Functions receive the `Window` object or `TabInformation` object as the first argument depending on the component group
+> Functions receive the `Window` object or `TabInformation` object as the first
+> argument depending on the component group
 
 ##### Text string as tabline component
 
 ```lua
-sections = { tabline_a = { 'Hello World' } }
+sections = { status_left = { 'Hello World' } }
 ```
 
 ##### WezTerm Formatitem as tabline component
 
-You can find all the available format items [here](https://wezfurlong.org/wezterm/config/lua/wezterm/format.html). The `ResetAttributes` format item has been overwritten to reset all attributes back to the default for that component instead of the WezTerm default.
+You can find all the available format items
+[here](https://wezfurlong.org/wezterm/config/lua/wezterm/format.html). The
+`ResetAttributes` format item has been overwritten to reset all attributes back
+to the default for that component instead of the WezTerm default.
 
 ```lua
 sections = {
-  tabline_c = {
+  status_left = {
     { Attribute = { Underline = 'Single' } },
     { Foreground = { AnsiColor = 'Fuchsia' } },
     { Background = { Color = 'blue' } },
@@ -336,7 +313,7 @@ You can use any valid lua expression as a component including:
 - require statements
 
 ```lua
-sections = { tabline_c = { os.date('%a'), data, require('util').status() } }
+sections = { status_right = { os.date('%a'), data, require('util').status() } }
 ```
 
 `data` is a global variable in this example.
@@ -359,16 +336,16 @@ Global options used locally overwrites the global, for example:
 tabline.setup {
   options = { fmt = string.lower },
   sections = {
-    tabline_a = {
-      { 'mode', fmt = function(str) return str:sub(1,1) end }
+    status_left = {
+      { 'cwd', fmt = function(str) return str:sub(-20) end }
+      'window'
     },
-    tabline_b = { 'window' }
   }
 }
 ```
 
-`mode` will be formatted with the passed function so only first char will be
-shown. On the other hand `window` will be formatted with the global formatter
+`cwd` will be formatted with the passed function so last 20 char will be shown.
+On the other hand `window` will be formatted with the global formatter
 `string.lower` so it will be showed in lower case.
 
 #### Available options
@@ -411,9 +388,9 @@ and are available for all components.
 
 ```lua
 sections = {
-  tabline_a = {
+  status_left = {
     {
-      'mode',
+      'workspace',
       icons_enabled = true, -- Enables the display of icons alongside the component.
       -- Defines the icon to be displayed in front of the component.
       -- Can be string|table
@@ -454,7 +431,7 @@ specify if it should be zero indexed.
 
 ```lua
 sections = {
-  tabline_a = {
+  status_right = {
     {
       'datetime',
       -- options: your own format string ('%Y/%m/%d %H:%M:%S', etc.)
@@ -541,7 +518,7 @@ sections = {
 
 ```lua
 sections = {
-  tabline_a = {
+  status_right = {
     {
       'cpu',
       throttle = 3, -- How often in seconds the component updates, set to 0 to disable throttling
@@ -554,7 +531,7 @@ sections = {
 
 ```lua
 sections = {
-  tabline_a = {
+  status_right = {
     {
       'battery',
       battery_to_icon = {
@@ -576,7 +553,7 @@ sections = {
 
 ```lua
 sections = {
-  tabline_a = {
+  status_right = {
     {
       'domain',
       domain_to_icon = {
@@ -606,89 +583,33 @@ sections = {
 
 ---
 
-### Extensions
-
-tabline extensions change statusline appearance for other plugins.
-
-By default no extensions are loaded to improve performance.
-You can load extensions with:
-
-```lua
-extensions = { 'resurrect' }
-```
-
-#### Available extensions
-
-- resurrect
-- smart_workspace_switcher
-- quick_domains
-- presentation
-
-#### Custom extensions
-
-You can define your own extensions. If you believe an extension may be useful to others, then please submit a PR.
-
-Custom extensions requires a `show` event to be defined. When the `show` event is triggered the defined `sections` will be shown. If a section in `sections` is not defined it will use the default from the config.
-The `hide` event is optional. When the `hide` event is triggered the extension will hide the defined `sections`.
-If the `hide` event is not defined the extension will hide the `sections` after the `delay` which is set to 5 seconds by default.
-You can also have a `delay` with the `hide` event, which will delay the hide for the specified time in seconds after the `hide` event is triggered.
-You can also have a optional `callback` function that will be called when the `show` event is triggered with the properties from the event.
-The `colors` overwrite the default colors for the extension to use with its `sections`.
-
-```lua
-local my_extension = {
-  'my_extension_name',
-  events = {
-    show = 'my_plugin.show',
-    hide = 'my_plugin.hide',
-    delay = 3
-    callback = function(window)
-      wezterm.log_info('Extension was shown')
-    end
-  },
-  sections = {
-    tabline_a = { 'mode' }
-  },
-  colors = {
-    a = { fg = '#181825', bg = '#f38ba8' },
-    b = { fg = '#f38ba8', bg = '#313244' },
-    c = { fg = '#cdd6f4', bg = '#181825' },
-  }
-}
-
-tabline.setup({ extensions = { my_extension } })
-```
-
-You can also pass multiple events to the `show` and `hide` properties.
-
-```lua
-events = {
-  show = { 'my_plugin.show', 'my_plugin.show2' },
-  hide = { 'my_plugin.hide', 'my_plugin.hide2' }
-}
-```
-
----
-
 ### Refreshing tabline
 
-By default tabline refreshes itself based on the [`status_update_interval`](https://wezfurlong.org/wezterm/config/lua/config/status_update_interval.html). However you can also force
-tabline to refresh at any time by calling `tabline.refresh` function.
-The refresh function needs the Window object to refresh the tabline, and the TabInformation object to refresh the tabs. If passing one of them as nil it won't refresh the respective section.
+By default tabline refreshes itself based on the
+[`status_update_interval`](https://wezfurlong.org/wezterm/config/lua/config/status_update_interval.html).
+However you can also force tabline to refresh at any time by calling
+`tabline.refresh` function. The refresh function needs the Window object to
+refresh the tabline, and the TabInformation object to refresh the tabs. If
+passing one of them as nil it won't refresh the respective section.
 
 ```lua
 tabline.refresh(window, tab)
 ```
 
-Avoid calling `tabline.refresh` inside components. Since components are evaluated
-during refresh, calling refresh while refreshing can have undesirable effects.
+Avoid calling `tabline.refresh` inside components. Since components are
+evaluated during refresh, calling refresh while refreshing can have undesirable
+effects.
 
 ### Disabling tabline
 
-You can also disable tabline completely. By setting the [enable_tab_bar](https://wezfurlong.org/wezterm/config/lua/config/enable_tab_bar.html) option to false in the WezTerm config.
+You can also disable tabline completely. By setting the
+[enable_tab_bar](https://wezfurlong.org/wezterm/config/lua/config/enable_tab_bar.html)
+option to false in the WezTerm config.
 
 ### Inspiration
 
-Thanks to [MLFlexer](https://github.com/MLFlexer) for some tips in developing a plugin for WezTerm.
+Thanks to [MLFlexer](https://github.com/MLFlexer) for some tips in developing a
+plugin for WezTerm.
 
-Thanks to [lualine.nvim](https://github.com/nvim-lualine/lualine.nvim) for the inspiration and a nice statusline for my Neovim.
+Thanks to [lualine.nvim](https://github.com/nvim-lualine/lualine.nvim) for the
+inspiration and a nice statusline for my Neovim.
